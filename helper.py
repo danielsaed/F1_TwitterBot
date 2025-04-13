@@ -830,7 +830,7 @@ def detect_and_correct_radius_outliers(df, radius_col='radio_curvatura', thresho
 
 
 
-def merge_on_nearest_time(df_coords, df_telemetry, time_col='Time'):
+'''def merge_on_nearest_time(df_coords, df_telemetry, time_col='Time'):
     """
     Une dos DataFrames buscando el valor más cercano de 'Time' en df_telemetry
     para cada fila en df_coords. Similar a un left join aproximado.
@@ -851,6 +851,34 @@ def merge_on_nearest_time(df_coords, df_telemetry, time_col='Time'):
     merged_df = pd.merge_asof(
         df_coords_sorted,
         df_telemetry_sorted,
+        on=time_col,
+        direction='nearest',
+        tolerance=None  # puedes limitar si quieres máxima diferencia
+    )
+    return merged_df'''
+
+
+def merge_on_nearest_time(df_coords, df_telemetry, time_col='Time'):
+    """
+    Une dos DataFrames buscando el valor más cercano de 'Time' en df_telemetry
+    para cada fila en df_coords. Similar a un left join aproximado.
+    
+    Parámetros:
+        df_coords: DataFrame base (pocas filas), debe tener la columna 'Time'.
+        df_telemetry: DataFrame con más filas, también con la columna 'Time'.
+        time_col: Nombre de la columna de tiempo (por defecto 'Time').
+        
+    Retorna:
+        Un DataFrame combinado con las columnas de ambos, alineados por el tiempo más cercano.
+    """
+    # Asegurar que ambos estén ordenados por tiempo
+    df_coords_sorted = df_coords.sort_values(by=time_col).reset_index(drop=True)
+    df_telemetry_sorted = df_telemetry.sort_values(by=time_col).reset_index(drop=True)
+    
+    # Usamos merge_asof para unir por el tiempo más cercano
+    merged_df = pd.merge_asof(
+        df_telemetry_sorted,
+        df_coords_sorted,
         on=time_col,
         direction='nearest',
         tolerance=None  # puedes limitar si quieres máxima diferencia
